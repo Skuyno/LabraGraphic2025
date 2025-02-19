@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "f+A8eCg84kwcXeuegVW3V75I8lbKGw7/eQZNNxEHMwDvFyirxLNSRJNoA2AdlJ6Y0EYMinHIYb/rp1lHE5Pp8w==",
+  "dgSpecHash": "i3NXjpvWKkmoYKl8DBADwKYV0PizkfT9GOO31OQJmlLKaKELWl7ZG4QybuJsXu7IH3yCEueYzUE1oaXMnXwnYQ==",
   "success": true,
   "projectFilePath": "F:\\C#\\LabraGraphic2025\\LabraGraphic2025.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\maksa\\.nuget\\packages\\mathnet.numerics\\5.0.0\\mathnet.numerics.5.0.0.nupkg.sha512",
+    "C:\\Users\\maksa\\.nuget\\packages\\sixlabors.imagesharp\\3.1.6\\sixlabors.imagesharp.3.1.6.nupkg.sha512"
+  ],
   "logs": []
 }
