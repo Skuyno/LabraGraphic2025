@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LabraGraphic2025")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0794b6736f69484003f35a418cba8d4aa9bbf7c5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ff6ffdaf57dc8017f6efc857d26eecaa1286d87a")]
 [assembly: System.Reflection.AssemblyProductAttribute("LabraGraphic2025")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LabraGraphic2025")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
