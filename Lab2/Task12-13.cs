@@ -1,17 +1,18 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-public class Task10()
+public class Task12_13()
 {
+    private static double[,] zBuffer;
     public static void Run()
     {
         var vertices = ReadVertices("model_1.obj");
         var polygons = ReadPolygons("model_1.obj");
-        
+
         using (var image = new Image<Rgba32>(1000, 1000))
         {
             RenderModel(image, vertices, polygons);
-            image.Save("modelka.png");
+            image.Save("modelkaaa.png");
         }
     }
 
@@ -70,17 +71,10 @@ public class Task10()
 
     private static void RenderModel(Image<Rgba32> image, List<Vertex> vertices, List<int[]> polygons)
     {
-        Random rand = new Random();
+        var lightDirection = new Vector3(0, 0, 1);
+
         foreach (var polygon in polygons)
         {
-            if (polygon.Length != 3) continue;
-
-            var color = new Rgba32(
-                (byte)rand.Next(256),
-                (byte)rand.Next(256),
-                (byte)rand.Next(256)
-            );
-
             try
             {
                 var v0 = vertices[polygon[0]];
@@ -91,11 +85,15 @@ public class Task10()
                 var p1 = ProjectVertex(v1);
                 var p2 = ProjectVertex(v2);
 
-                DrawTriangle(image, color,
-                    p0.Item1, p0.Item2,
-                    p1.Item1, p1.Item2,
-                    p2.Item1, p2.Item2
-                );
+                Vector3 normal = CalculateNormal(v0, v1, v2);
+
+                double cosTheta = Vector3.Dot(normal.Normalized(), lightDirection);
+                if (cosTheta >= 0) continue;
+
+                byte intensity = (byte)(-cosTheta * 255);
+                var color = new Rgba32(intensity, intensity, intensity);
+
+                DrawTriangleWithZBuffer(image, color, p0, p1, p2);
             }
             catch (ArgumentException ex)
             {
@@ -122,43 +120,49 @@ public class Task10()
         return (lambda0, lambda1, lambda2);
     }
 
-    public static void DrawTriangle(Image<Rgba32> image, Rgba32 color,
-        double x0, double y0,
-        double x1, double y1,
-        double x2, double y2)
+    private static Vector3 CalculateNormal(Vertex v0, Vertex v1, Vertex v2)
     {
-        // Определение ограничивающего прямоугольника
-        double xmin = Math.Max(0, Math.Min(x0, Math.Min(x1, x2)));
-        double xmax = Math.Min(image.Width - 1, Math.Max(x0, Math.Max(x1, x2)));
-        double ymin = Math.Max(0, Math.Min(y0, Math.Min(y1, y2)));
-        double ymax = Math.Min(image.Height - 1, Math.Max(y0, Math.Max(y1, y2)));
+        Vector3 edge1 = new Vector3(v1.X - v0.X, v1.Y - v0.Y, v1.Z - v0.Z);
+        Vector3 edge2 = new Vector3(v2.X - v0.X, v2.Y - v0.Y, v2.Z - v0.Z);
+        return Vector3.Cross(edge1, edge2);
+    }
 
-        // Блокируем изображение для прямого доступа к пикселям
+    private static void DrawTriangleWithZBuffer(
+        Image<Rgba32> image,
+        Rgba32 color,
+        Vertex v0,
+        Vertex v1,
+        Vertex v2)
+    {
+        int minX = (int)Math.Max(0, Math.Floor(Math.Min(v0.X, Math.Min(v1.X, v2.X))));
+        int maxX = (int)Math.Min(image.Width - 1, Math.Ceiling(Math.Max(v0.X, Math.Max(v1.X, v2.X))));
+        int minY = (int)Math.Max(0, Math.Floor(Math.Min(v0.Y, Math.Min(v1.Y, v2.Y))));
+        int maxY = (int)Math.Min(image.Height - 1, Math.Ceiling(Math.Max(v0.Y, Math.Max(v1.Y, v2.Y))));
+
         image.ProcessPixelRows(accessor =>
         {
-            for (int y = (int)ymin; y <= ymax; y++)
+            for (int y = minY; y <= maxY; y++)
             {
-                Span<Rgba32> pixelRow = accessor.GetRowSpan(y);
-
-                for (int x = (int)xmin; x <= xmax; x++)
+                var row = accessor.GetRowSpan(y);
+                for (int x = minX; x <= maxX; x++)
                 {
-                    var (lambda0, lambda1, lambda2) =
-                        CalculateBarycentric(x, y, x0, y0, x1, y1, x2, y2);
+                    var (l0, l1, l2) = CalculateBarycentric(x, y,
+                        v0.X, v0.Y,
+                        v1.X, v1.Y,
+                        v2.X, v2.Y);
 
-                    if (lambda0 >= 0 && lambda1 >= 0 && lambda2 >= 0)
+                    if (l0 >= 0 && l1 >= 0 && l2 >= 0)
                     {
-                        pixelRow[x] = color;
+                        row[x] = color;
                     }
-
                 }
             }
         });
     }
-
-    private static (int, int) ProjectVertex(Vertex vertex)
+    private static Vertex ProjectVertex(Vertex vertex)
     {
-        int x = (int)(6400 * vertex.X + 500);
-        int y = (int)(6400 * vertex.Y + 500);
-        return (x, y);
+        vertex.X = (int)(6400 * vertex.X + 500);
+        vertex.Y = (int)(6400 * vertex.Y + 500);
+        return vertex;
     }
 }

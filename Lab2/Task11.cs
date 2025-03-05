@@ -1,17 +1,17 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-public class Task10()
+public class Task11()
 {
     public static void Run()
     {
         var vertices = ReadVertices("model_1.obj");
         var polygons = ReadPolygons("model_1.obj");
-        
+
         using (var image = new Image<Rgba32>(1000, 1000))
         {
             RenderModel(image, vertices, polygons);
-            image.Save("modelka.png");
+            image.Save("modelkaa.png");
         }
     }
 
@@ -91,6 +91,8 @@ public class Task10()
                 var p1 = ProjectVertex(v1);
                 var p2 = ProjectVertex(v2);
 
+                Vector3 normal = CalculateNormal(v0, v1, v2);
+
                 DrawTriangle(image, color,
                     p0.Item1, p0.Item2,
                     p1.Item1, p1.Item2,
@@ -120,6 +122,13 @@ public class Task10()
         double lambda2 = 1.0 - lambda0 - lambda1;
 
         return (lambda0, lambda1, lambda2);
+    }
+
+    private static Vector3 CalculateNormal(Vertex v0, Vertex v1, Vertex v2)
+    {
+        Vector3 edge1 = new Vector3(v1.X - v0.X, v1.Y - v0.Y, v1.Z - v0.Z);
+        Vector3 edge2 = new Vector3(v2.X - v0.X, v2.Y - v0.Y, v2.Z - v0.Z);
+        return Vector3.Cross(edge1, edge2);
     }
 
     public static void DrawTriangle(Image<Rgba32> image, Rgba32 color,
@@ -154,11 +163,43 @@ public class Task10()
             }
         });
     }
-
     private static (int, int) ProjectVertex(Vertex vertex)
     {
         int x = (int)(6400 * vertex.X + 500);
         int y = (int)(6400 * vertex.Y + 500);
         return (x, y);
+    }
+}
+
+public struct Vector3
+{
+    public double X;
+    public double Y;
+    public double Z;
+
+    public Vector3(double x, double y, double z)
+    {
+        X = x;
+        Y = y;
+        Z = z;
+    }
+
+    public Vector3 Normalized()
+    {
+        double length = Math.Sqrt(X * X + Y * Y + Z * Z);
+        return new Vector3(X / length, Y / length, Z / length);
+    }
+
+    public static double Dot(Vector3 a, Vector3 b)
+    {
+        return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
+    }
+
+    public static Vector3 Cross(Vector3 a, Vector3 b)
+    {
+        return new Vector3(
+            a.Y * b.Z - a.Z * b.Y,
+            a.Z * b.X - a.X * b.Z,
+            a.X * b.Y - a.Y * b.X);
     }
 }
